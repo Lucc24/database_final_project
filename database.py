@@ -6,8 +6,8 @@ from datetime import datetime
 def create_connection():
     try:
         connection = mysql.connector.connect(
-            host='localhost',
-            database='music_db',
+            host='127.0.0.1',
+            database='music_database',
             user='root',
             password='awesomesauce'
         )
@@ -37,14 +37,26 @@ def add_artist(connection, name, genre, bio):
         cursor.close()
 
 
-def add_song(connection, artist_id, title, bpm, duration_seconds, release_date):
+def add_song(connection, artist_id, title, bpm, duration_seconds, mood, release_date):
     try:
         cursor = connection.cursor()
         query = "INSERT INTO songs (artist_id, title, bpm, duration_seconds, release_date) VALUES (%s, %s, %s, %s, %s)"
         cursor.execute(query, (artist_id, title, bpm, duration_seconds, release_date))
         connection.commit()
+        song_id = cursor.lastrowid
+        
+        mood_query = "SELECT mood_id FROM moods WHERE mood_name LIKE %s"
+        cursor.execute(mood_query, (f"%{mood}%",))
+        mood_result = cursor.fetchone()
+        
+        if mood_result:
+            mood_id = mood_result[0]
+            mood_insert = "INSERT INTO song_moods (song_id, mood_id, intensity_rank) VALUES (%s, %s, %s)"
+            cursor.execute(mood_insert, (song_id, mood_id, 5))
+            connection.commit()
+        
         print(f"Song '{title}' added")
-        return cursor.lastrowid
+        return song_id
     except Error as e:
         print(f"Error adding song: {e}")
         return None
@@ -119,6 +131,17 @@ def get_artist_by_id(connection, artist_id):
         print(f"Error: {e}")
         return None
 
+def get_all_songs(connection):
+    try:
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT s.*, a.name as artist_name FROM songs s JOIN artists a ON s.artist_id = a.artist_id ORDER BY s.title"
+        cursor.execute(query)
+        songs = cursor.fetchall()
+        cursor.close()
+        return songs
+    except Error as e:
+        print(f"Error: {e}")
+        return []
 
 def get_songs_by_artist(connection, artist_name):
     try:
@@ -136,7 +159,7 @@ def get_songs_by_artist(connection, artist_name):
 def get_songs_by_mood(connection, mood_name):
     try:
         cursor = connection.cursor(dictionary=True)
-        query = """SELECT DISTINCT s.*, a.name as artist_name, m.mood_name 
+        query = """SELECT s.*, a.name as artist_name 
                    FROM songs s 
                    JOIN artists a ON s.artist_id = a.artist_id 
                    JOIN song_moods sm ON s.song_id = sm.song_id 
@@ -179,10 +202,7 @@ def get_all_moods(connection):
 def get_all_playlists(connection):
     try:
         cursor = connection.cursor(dictionary=True)
-        query = """SELECT p.*, COUNT(pc.song_id) as song_count 
-                   FROM playlists p 
-                   LEFT JOIN playlist_contents pc ON p.playlist_id = pc.playlist_id 
-                   GROUP BY p.playlist_id"""
+        query = "SELECT p.*, COUNT(pc.song_id) as song_count FROM playlists p LEFT JOIN playlist_contents pc ON p.playlist_id = pc.playlist_id GROUP BY p.playlist_id"
         cursor.execute(query)
         playlists = cursor.fetchall()
         cursor.close()
@@ -195,12 +215,7 @@ def get_all_playlists(connection):
 def get_playlist_songs(connection, playlist_id):
     try:
         cursor = connection.cursor(dictionary=True)
-        query = """SELECT pc.track_order, s.*, a.name as artist_name 
-                   FROM playlist_contents pc 
-                   JOIN songs s ON pc.song_id = s.song_id 
-                   JOIN artists a ON s.artist_id = a.artist_id 
-                   WHERE pc.playlist_id = %s 
-                   ORDER BY pc.track_order"""
+        query = "SELECT pc.track_order, s.*, a.name as artist_name FROM playlist_contents pc JOIN songs s ON pc.song_id = s.song_id JOIN artists a ON s.artist_id = a.artist_id WHERE pc.playlist_id = %s ORDER BY pc.track_order"
         cursor.execute(query, (playlist_id,))
         songs = cursor.fetchall()
         cursor.close()

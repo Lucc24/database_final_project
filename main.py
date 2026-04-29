@@ -41,6 +41,7 @@ def add_artist(conn):
     name = get_input("Artist name: ")
     genre = get_input("Genre: ")
     bio = get_input("Description: ")
+    
     database.add_artist(conn, name, genre, bio)
 
 
@@ -133,13 +134,17 @@ def add_song(conn):
     title = get_input("Song title: ")
     bpm = get_input("BPM: ", int)
     duration = get_input("Duration (seconds): ", int)
-    
+    print("Available moods:")
+    moods = database.get_all_moods(conn)
+    for mood in moods:
+        print(f"  - {mood['mood_name']}")
+    mood = get_input("Mood: ")
     year = get_input("Release year (YYYY): ", int)
     month = get_input("Release month (MM): ", int)
     day = get_input("Release day (DD): ", int)
     
     release_date = f"{year}-{month:02d}-{day:02d}"
-    database.add_song(conn, artist_id, title, bpm, duration, release_date)
+    database.add_song(conn, artist_id, title, bpm, duration, mood, release_date)
 
 
 def search_by_artist(conn):
@@ -169,9 +174,9 @@ def search_by_mood(conn):
         print("No songs found with that mood")
         return
     
-    print(f"\nFound {len(songs)} song(s):")
+    print(f"\nFound {len(songs)} song(s) with {mood_name}:")
     for song in songs:
-        print(f"  ID: {song['song_id']} | {song['title']} - {song['mood_name']}")
+        print(f"  ID: {song['song_id']} | {song['title']} by {song['artist_name']}")
 
 
 def search_by_bpm(conn):
@@ -303,14 +308,22 @@ def view_playlist_songs(conn):
 
 
 def add_song_to_playlist(conn):
+
     view_playlists(conn)
     playlist_id = get_input("\nEnter playlist ID: ", int)
-    song_id = get_input("Enter song ID: ", int)
+    print("Available songs:")
+    for song in database.get_all_songs(conn):
+        print(f"  ID: {song['song_id']} | {song['title']} by {song['artist_name']}")
     
+    song_id = get_input("Enter song ID: ", int)
+
     database.add_song_to_playlist(conn, playlist_id, song_id)
 
 
 def remove_song_from_playlist(conn):
+    print("Available playlists:")
+    for playlist in database.get_all_playlists(conn):
+        print(f"  ID: {playlist['playlist_id']} | {playlist['playlist_title']}")
     playlist_id = get_input("Enter playlist ID: ", int)
     song_id = get_input("Enter song ID: ", int)
     

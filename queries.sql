@@ -1,104 +1,49 @@
-
--- get all songs by the beatles and their details
-SELECT 
-    s.song_id,
-    s.title,
-    s.bpm,
-    s.duration_seconds,
-    s.release_date,
-    a.name as artist_name,
-    a.genre
+-- Get all songs by The Beatles
+SELECT s.song_id, s.title, s.bpm, s.release_date, a.name
 FROM songs s
 JOIN artists a ON s.artist_id = a.artist_id
-WHERE a.name = 'The Beatles'
-ORDER BY s.release_date DESC;
+WHERE a.name = 'The Beatles';
 
---Find all moods associated with bohemian rapshody and their intensity
-SELECT 
-    s.title as song_title,
-    a.name as artist_name,
-    m.mood_name,
-    m.description,
-    sm.intensity_rank
+-- Get moods for Bohemian Rhapsody
+SELECT s.title, m.mood_name
 FROM songs s
-JOIN artists a ON s.artist_id = a.artist_id
 JOIN song_moods sm ON s.song_id = sm.song_id
 JOIN moods m ON sm.mood_id = m.mood_id
-WHERE s.title = 'Bohemian Rhapsody'
-ORDER BY sm.intensity_rank ASC;
+WHERE s.title = 'Bohemian Rhapsody';
 
---  Get the rclassic rock playlist with all song details
-SELECT 
-    p.playlist_id,
-    p.playlist_title,
-    p.description,
-    pc.track_order,
-    s.song_id,
-    s.title,
-    a.name as artist_name,
-    s.duration_seconds,
-    s.bpm
-FROM playlists p
-JOIN playlist_contents pc ON p.playlist_id = pc.playlist_id
+-- Get all songs in Classic Rock Hits playlist
+SELECT pc.track_order, s.title, a.name
+FROM playlist_contents pc
 JOIN songs s ON pc.song_id = s.song_id
 JOIN artists a ON s.artist_id = a.artist_id
+JOIN playlists p ON pc.playlist_id = p.playlist_id
 WHERE p.playlist_title = 'Classic Rock Hits'
-ORDER BY pc.track_order ASC;
+ORDER BY pc.track_order;
 
--- Find all songs with a relaxibng mood
-SELECT 
-    s.song_id,
-    s.title,
-    a.name as artist_name,
-    a.genre,
-    s.bpm,
-    s.duration_seconds,
-    m.mood_name,
-    sm.intensity_rank
+-- Get all Relaxing songs
+SELECT s.title, a.name, s.bpm
 FROM songs s
 JOIN artists a ON s.artist_id = a.artist_id
 JOIN song_moods sm ON s.song_id = sm.song_id
 JOIN moods m ON sm.mood_id = m.mood_id
-WHERE m.mood_name = 'Relaxing'
-ORDER BY sm.intensity_rank DESC, s.title ASC;
+WHERE m.mood_name = 'Relaxing';
 
--- Count songs by genre and get artist information
-SELECT 
-    a.genre,
-    a.name as artist_name,
-    COUNT(s.song_id) as total_songs,
-    AVG(s.bpm) as average_bpm,
-    AVG(s.duration_seconds) as average_duration
+-- Count songs per artist
+SELECT a.name, COUNT(s.song_id) as song_count
 FROM artists a
 LEFT JOIN songs s ON a.artist_id = s.artist_id
-GROUP BY a.artist_id, a.genre, a.name
-ORDER BY total_songs DESC;
+GROUP BY a.artist_id, a.name;
 
---  Find songs within 120 and 150 BPM 
-SELECT 
-    s.song_id,
-    s.title,
-    a.name as artist_name,
-    s.bpm,
-    s.duration_seconds,
-    s.release_date
+-- Find songs between 120-150 BPM
+SELECT s.title, a.name, s.bpm
 FROM songs s
 JOIN artists a ON s.artist_id = a.artist_id
-WHERE s.bpm BETWEEN 120 AND 150
-ORDER BY s.bpm DESC;
+WHERE s.bpm BETWEEN 120 AND 150;
 
--- Get all playlists with song count and total duration
-SELECT 
-    p.playlist_id,
-    p.playlist_title,
-    p.description,
-    p.created_at,
-    COUNT(pc.song_id) as song_count,
-    SEC_TO_TIME(SUM(s.duration_seconds)) as total_duration,
-    ROUND(AVG(s.bpm), 2) as average_bpm
+-- Get all playlists and song count
+SELECT p.playlist_id, p.playlist_title, COUNT(pc.song_id) as song_count
 FROM playlists p
 LEFT JOIN playlist_contents pc ON p.playlist_id = pc.playlist_id
-LEFT JOIN songs s ON pc.song_id = s.song_id
 GROUP BY p.playlist_id, p.playlist_title, p.description, p.created_at
 ORDER BY song_count DESC;
 
