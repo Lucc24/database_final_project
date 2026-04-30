@@ -22,7 +22,7 @@ The datbase consists of six core tables that organize musical data and user crea
 The Vibe Check Archive Python application provides the following capabilities:
 + **Comprehensive Artist Management**: Full ability to add, view details, update profiles, and delete artists. 
 + **Multi-Criteria Song Discovery**: Search and filter the libary by specific Artist names, Mood types, or precise BPM ranges for chill or high energy sessions.
-+ **Dynamic Playlist Curation**- Create named playlists with custom descriptions and mangage tracklists by adding or removing songs with automated track ordering.
++ **Dynamic Playlist Curation**: Create named playlists with custom descriptions and mangage tracklists by adding or removing songs with automated track ordering.
 
 --- 
 ## Setup Instructions 
