@@ -42,8 +42,9 @@ The Vibe Check Archive Python application provides the following capabilities:
 
 --- 
 ## Example Usage 
-
-
+![](pic1.png)
+![](pic2.png)
+![](pic3.png)
 --- 
 ## Known Bugs & Limitations
 + **Connection Config**: The database credentials such as host, user, and password, are currently hardcodedin database.py and may need to be manually updated for different local environments. 
@@ -52,3 +53,11 @@ The Vibe Check Archive Python application provides the following capabilities:
 --- 
 ## Reflection
 Creating the **Vibe Check Archive** provided a deep dive into the complexities of relational database design, specifically regarding many-to-many relationships. One of the prmary challenges was managing the **song_moods** and **playlist_contents tables. Ensuring that a signle song could reflect multiple vibes while still maintaining a specific order within a playlist required careful application of primary and foreign keys to maintain the integrity of the data. Beyond the technical setup, this projec highted the calue of metadata in user experience. Moving from a simple list to an archive where you can query for things like Dark and Moody songs released after 1970 showed how structured data can transform how we interact with media. We learned that the why behind a playlist is just as important as the songs themselves, which lead us to include detailed descriptions and timestamps in the schema. 
+
+## File Structure
+* `schema.sql`: Table creation scripts.
+* `data.sql`: Sample data and initial seeds.
+* `queries.sql`: Example SQL queries for testing.
+* `main.py`: The primary CLI application entry point.
+* `database.py`: Contains all Python functions for database interaction.
+* `requirements.txt`: List of Python dependencies.
